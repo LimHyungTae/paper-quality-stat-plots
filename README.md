@@ -1,6 +1,6 @@
-# statannotations Examples
+# `statannotations` Examples
 
-Real-world examples of [statannotations](https://github.com/trevismd/statannotations) drawn from figures published in the [KISS-Matcher paper](https://arxiv.org/abs/2409.15615) (RA-L 2025).
+Real-world examples of [statannotations](https://github.com/trevismd/statannotations) drawn from figures published in my papers.
 
 ---
 
@@ -51,134 +51,25 @@ pairs = [
 
 ## Gallery
 
-| Basic box plot | Speed comparison | Pose est. time (log scale) |
-|:-:|:-:|:-:|
-| ![](output/for_README/example_basic.png) | ![](output/for_README/speed.png) | ![](output/for_README/bufferx_poseest_time.png) |
-| `example_basic_boxplot.py` | `plot_speed.py` | `plot_bufferx_poseest_time.py` |
-
-| Translation error | Rotation error | Success rate (bar plot) |
-|:-:|:-:|:-:|
-| ![](output/for_README/trans_error.png) | ![](output/for_README/rot_error.png) | ![](output/for_README/success_rate.png) |
-| `plot_trans_error.py` | `plot_rot_error.py` | `plot_success_rate.py` |
-
-| SLAM w/ vs. w/o loop closure | |
+| Speed comparison | w/ vs. w/o loop closure |
 |:-:|:-:|
-| ![](output/for_README/vggt_w_and_wo_lc.png) | |
-| `plot_vggt_slam_lc.py` | |
+| ![](output/for_README/speed.png) | ![](output/for_README/vggt_w_and_wo_lc.png) |
+| `plot_speed.py` | `plot_vggt_slam_lc.py` |
 
----
+| Translation error | Rotation error |
+|:-:|:-:|
+| ![](output/for_README/trans_error.png) | ![](output/for_README/rot_error.png) |
+| `plot_trans_error.py` | `plot_rot_error.py` |
 
-## Scripts
+| Success rate (bar plot) |
+|:-:|
+| ![](output/for_README/success_rate.png) |
+| `plot_success_rate.py` |
 
-### `example_basic_boxplot.py` — Minimal example (no hue)
-
-The simplest starting point. Uses seaborn's built-in `tips` dataset — no files needed.
-
-```python
-df = sns.load_dataset("tips")   # replace with your own pd.DataFrame
-x, y = "day", "total_bill"
-order = ['Sun', 'Thur', 'Fri', 'Sat']
-
-ax = sns.boxplot(data=df, x=x, y=y, order=order)
-annot = Annotator(ax, [("Thur", "Fri"), ("Thur", "Sat"), ("Fri", "Sun")],
-                  data=df, x=x, y=y, order=order)
-annot.configure(test='Mann-Whitney', text_format='star', loc='inside', verbose=2)
-annot.apply_test()
-ax, test_results = annot.annotate()
-```
-
-**DataFrame:** `{'day': str, 'total_bill': float}`
-
----
-
-### `plot_speed.py` — Multi-hue box plot
-
-Compares feature extraction time of FPFH vs. Faster-PFH under single/multi-thread and w/ or w/o ground segmentation.
-
-**DataFrame:** `{'thread': str, 'alg_name': str, 'time': float [s]}`
-
-```bash
-python3 plot_speed.py
-```
-
----
-
-### `plot_bufferx_poseest_time.py` — Log scale + LaTeX labels
-
-Compares pose estimation time of RANSAC vs. KISS-Matcher across five datasets on a **log y-axis**.
-
-```python
-plt.rcParams['text.usetex'] = True   # enable LaTeX; set False to disable
-ax = sns.boxplot(...)
-plt.yscale('log')
-annot = Annotator(ax, pairs, ...)
-annot.configure(test='Mann-Whitney', verbose=2)
-annot.apply_test()
-annot.annotate()
-```
-
-**DataFrame:** `{'Dataset': str, 'alg_name': str, 'PoseEst_time': float [s]}`
-
-```bash
-python3 plot_bufferx_poseest_time.py
-```
-
----
-
-### `plot_trans_error.py` / `plot_rot_error.py` — Pose error box plots
-
-Translation error [m] and rotation error [deg] across KITTI and MulRan datasets. Set `consider_only_succeeded = True` to include only successful registrations.
-
-**DataFrame:** `{'Dataset': str, 'alg_name': str, 'time': float}`
-
-```bash
-python3 plot_trans_error.py
-python3 plot_rot_error.py
-```
-
----
-
-### `plot_success_rate.py` — Bar plot
-
-Demonstrates that statannotations works identically with `sns.barplot` — just swap `boxplot` for `barplot`.
-
-**DataFrame:** `{'Dataset': str, 'Alg. name': str, 'time': float [%]}`
-
-```bash
-python3 plot_success_rate.py
-```
-
----
-
-### `plot_vggt_slam_lc.py` — Two-group comparison
-
-ATE [m] with vs. without loop closure across different window sizes. A minimal two-group example.
-
-**DataFrame:** `{'Window size': str, 'alg_name': str, 'time': float [m]}`
-
-```bash
-python3 plot_vggt_slam_lc.py
-```
-
----
-
-## File Structure
-
-```
-.
-├── example_basic_boxplot.py      # Minimal statannotations example (no hue)
-├── plot_speed.py                 # Box plot: speed comparison, multi-hue
-├── plot_bufferx_poseest_time.py  # Box plot: log scale + LaTeX labels
-├── plot_trans_error.py           # Box plot: translation error
-├── plot_rot_error.py             # Box plot: rotation error
-├── plot_success_rate.py          # Bar plot: success rate
-├── plot_vggt_slam_lc.py          # Box plot: w/ vs. w/o loop closure
-├── variables.py                  # Shared plot styling constants
-├── data/                         # Input data
-└── output/
-    ├── for_README/               # Representative figures (tracked by git)
-    └── ...                       # Other generated plots (gitignored)
-```
+| Pose est. time (log scale) |
+|:-:|
+| ![](output/for_README/bufferx_poseest_time.png) |
+| `plot_bufferx_poseest_time.py` |
 
 ---
 
@@ -187,10 +78,26 @@ python3 plot_vggt_slam_lc.py
 If you find these examples useful, please consider citing:
 
 ```bibtex
-@article{lim2025kissmatcher,
-  title   = {KISS-Matcher: Fast and Robust Point Cloud Registration Revisited},
-  author  = {Lim, Hyungtae and Shi, Daebeom and Kim, Gunhee and Kim, Seungwon and Lu, Fan and Chen, Guang and Spring, Julien and Siegwart, Roland and Pfändtner, Jens and Schindler, Konrad and others},
-  journal = {IEEE Robotics and Automation Letters},
-  year    = {2025}
+@inproceedings{lim2025kiss,
+  title={{KISS-Matcher: Fast and robust point cloud registration revisited}},
+  author={Lim, Hyungtae and Kim, Daebeom and Shin, Gunhee and Shi, Jingnan and Vizzo, Ignacio and Myung, Hyun and Park, Jaesik and Carlone, Luca},
+  booktitle={2025 IEEE International Conference on Robotics and Automation (ICRA)},
+  pages={11104--11111},
+  year={2025},
+  organization={IEEE}
+}
+
+@article{maggio2025vggt,
+  title={VGGT-SLAM: Dense rgb slam optimized on the SL(4) manifold},
+  author={Maggio, Dominic and Lim, Hyungtae and Carlone, Luca},
+  journal={arXiv preprint arXiv:2505.12549},
+  year={2025}
+}
+
+@article{lim2026towards,
+  title={Towards Zero-Shot Point Cloud Registration Across Diverse Scales, Scenes, and Sensor Setups},
+  author={Lim, Hyungtae and Seo, Minkyun and Carlone, Luca and Park, Jaesik},
+  journal={arXiv preprint arXiv:2601.02759},
+  year={2026}
 }
 ```
