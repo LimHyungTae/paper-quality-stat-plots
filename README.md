@@ -1,6 +1,15 @@
-# `statannotations` Examples
-
-Real-world examples of [statannotations](https://github.com/trevismd/statannotations) drawn from figures published in my papers.
+<div align="center">
+    <h1><code>statannotations</code> Examples — Real-world Paper Figures</h1>
+    <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.8+-blue?logo=python&logoColor=white" /></a>
+    <a href="https://github.com/trevismd/statannotations"><img src="https://img.shields.io/badge/statannotations-tutorial-brightgreen" /></a>
+    <a href="https://arxiv.org/pdf/2409.15615"><img src="https://img.shields.io/badge/Published-ICRA_2025-red" /></a>
+    <a href="https://arxiv.org/pdf/2505.12549"><img src="https://img.shields.io/badge/Published-NeurIPS_2025-blue" /></a>
+    <a href="https://arxiv.org/pdf/2601.02759"><img src="https://img.shields.io/badge/arXiv-2505.12549-b31b1b" /></a>
+    <br />
+    <br />
+    <p align="center"><img src="data/thumbnail_fig.png" alt="Figures from published papers" width="95%"/></p>
+    <p><strong><em>Tutorials for publication-ready statistical plots</em></strong></p>
+</div>
 
 ---
 
