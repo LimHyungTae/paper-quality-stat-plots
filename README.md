@@ -1,8 +1,6 @@
 # statannotations Examples
 
-Real-world examples of statistical annotation on publication-quality plots using [statannotations](https://github.com/trevismd/statannotations), drawn from figures published in the [KISS-Matcher paper](https://arxiv.org/abs/2409.15615) (RA-L 2025).
-
-Each script is self-contained: load data → draw a seaborn plot → annotate with `statannotations`.
+Real-world examples of [statannotations](https://github.com/trevismd/statannotations) drawn from figures published in the [KISS-Matcher paper](https://arxiv.org/abs/2409.15615) (RA-L 2025).
 
 ---
 
@@ -12,145 +10,155 @@ Each script is self-contained: load data → draw a seaborn plot → annotate wi
 pip install statannotations seaborn matplotlib pandas numpy
 ```
 
+> **Note:** If you want to use LaTeX-rendered tick labels (as in `plot_bufferx_poseest_time.py`), a system LaTeX installation is also required. To disable it, set `plt.rcParams['text.usetex'] = False` and use plain strings.
+
 ---
 
-## Quick Start
+## How to use statannotations
 
-The simplest usage — no `hue`, annotations placed inside the plot:
+Every script follows the same three-step pattern — just swap in your own DataFrame:
 
 ```python
 from statannotations.Annotator import Annotator
-import matplotlib.pyplot as plt
 import seaborn as sns
 
-df = sns.load_dataset("tips")
+# Step 1. Draw the seaborn plot
+ax = sns.boxplot(data=df, x=x, y=y, hue=hue, order=order, hue_order=hue_order)
+
+# Step 2. Create the Annotator with the same arguments
+annot = Annotator(ax, pairs, data=df, x=x, y=y, hue=hue, order=order, hue_order=hue_order)
+
+# Step 3. Run the statistical test and annotate
+annot.configure(test='Mann-Whitney', verbose=2)
+annot.apply_test()
+annot.annotate()
+```
+
+**`pairs`** is the list of groups to compare. The format depends on whether `hue` is used:
+
+```python
+# Without hue — each element is a tuple of two x-axis category values
+pairs = [("Group A", "Group B"), ("Group A", "Group C")]
+
+# With hue — each element is a tuple of (x_value, hue_value) pairs
+pairs = [
+    (("Single-thread", "FPFH"),  ("Single-thread", "Faster-PFH")),
+    (("Multi-thread",  "FPFH"),  ("Multi-thread",  "Faster-PFH")),
+]
+```
+
+---
+
+## Gallery
+
+| Basic box plot | Speed comparison | Pose est. time (log scale) |
+|:-:|:-:|:-:|
+| ![](output/for_README/example_basic.png) | ![](output/for_README/speed.png) | ![](output/for_README/bufferx_poseest_time.png) |
+| `example_basic_boxplot.py` | `plot_speed.py` | `plot_bufferx_poseest_time.py` |
+
+| Translation error | Rotation error | Success rate (bar plot) |
+|:-:|:-:|:-:|
+| ![](output/for_README/trans_error.png) | ![](output/for_README/rot_error.png) | ![](output/for_README/success_rate.png) |
+| `plot_trans_error.py` | `plot_rot_error.py` | `plot_success_rate.py` |
+
+| SLAM w/ vs. w/o loop closure | |
+|:-:|:-:|
+| ![](output/for_README/vggt_w_and_wo_lc.png) | |
+| `plot_vggt_slam_lc.py` | |
+
+---
+
+## Scripts
+
+### `example_basic_boxplot.py` — Minimal example (no hue)
+
+The simplest starting point. Uses seaborn's built-in `tips` dataset — no files needed.
+
+```python
+df = sns.load_dataset("tips")   # replace with your own pd.DataFrame
 x, y = "day", "total_bill"
 order = ['Sun', 'Thur', 'Fri', 'Sat']
 
 ax = sns.boxplot(data=df, x=x, y=y, order=order)
-
 annot = Annotator(ax, [("Thur", "Fri"), ("Thur", "Sat"), ("Fri", "Sun")],
                   data=df, x=x, y=y, order=order)
 annot.configure(test='Mann-Whitney', text_format='star', loc='inside', verbose=2)
 annot.apply_test()
 ax, test_results = annot.annotate()
-
-plt.savefig('example_basic.png', dpi=300, bbox_inches='tight')
 ```
 
-```bash
-python3 example_basic_boxplot.py
-```
-
-![Basic boxplot with statannotations](figs/example_basic.png)
+**DataFrame:** `{'day': str, 'total_bill': float}`
 
 ---
 
-## Examples
+### `plot_speed.py` — Multi-hue box plot
 
-### 1. Box plot — with `hue` (multi-group comparison)
+Compares feature extraction time of FPFH vs. Faster-PFH under single/multi-thread and w/ or w/o ground segmentation.
 
-**Script:** `plot_speed.py`
-
-Compares feature extraction time of FPFH vs. Faster-PFH under single/multi-thread and w/ or w/o ground segmentation. Demonstrates annotations across `hue` groups using `hue_order` and grouped `pairs`.
-
-```python
-annot = Annotator(ax, pairs, data=df, x=x, y=y, order=order, hue=hue, hue_order=hue_order)
-annot.new_plot(ax, pairs, data=df, x=x, y=y, order=order, hue=hue, hue_order=hue_order)
-annot.configure(test='Mann-Whitney', verbose=2)
-annot.apply_test()
-annot.annotate()
-```
+**DataFrame:** `{'thread': str, 'alg_name': str, 'time': float [s]}`
 
 ```bash
 python3 plot_speed.py
 ```
 
-![Speed comparison](figs/speed_v2.png)
-
 ---
 
-### 2. Box plot — log scale + `hue`
+### `plot_bufferx_poseest_time.py` — Log scale + LaTeX labels
 
-**Script:** `plot_bufferx_poseest_time.py`
-
-Compares pose estimation time of RANSAC vs. KISS-Matcher across five datasets. Shows how to combine a **log-scale y-axis** with statannotations and LaTeX tick labels.
+Compares pose estimation time of RANSAC vs. KISS-Matcher across five datasets on a **log y-axis**.
 
 ```python
-plt.rcParams['text.usetex'] = True   # enable LaTeX rendering
-ax = sns.boxplot(..., palette={"RANSAC": "#1f77b4", "KISS-Matcher": "#ff7f0e"})
+plt.rcParams['text.usetex'] = True   # enable LaTeX; set False to disable
+ax = sns.boxplot(...)
 plt.yscale('log')
-
-annot = Annotator(ax, pairs, data=df, x=x, y=y, order=order, hue=hue, hue_order=hue_order)
+annot = Annotator(ax, pairs, ...)
 annot.configure(test='Mann-Whitney', verbose=2)
 annot.apply_test()
 annot.annotate()
 ```
 
+**DataFrame:** `{'Dataset': str, 'alg_name': str, 'PoseEst_time': float [s]}`
+
 ```bash
 python3 plot_bufferx_poseest_time.py
 ```
 
-![BufferX pose estimation time](figs/bufferx_poseest_time.png)
-
 ---
 
-### 3. Box plot — pose errors (translation & rotation)
+### `plot_trans_error.py` / `plot_rot_error.py` — Pose error box plots
 
-**Scripts:** `plot_trans_error.py` / `plot_rot_error.py`
+Translation error [m] and rotation error [deg] across KITTI and MulRan datasets. Set `consider_only_succeeded = True` to include only successful registrations.
 
-Translation error [m] and rotation error [deg] across KITTI and MulRan datasets.
+**DataFrame:** `{'Dataset': str, 'alg_name': str, 'time': float}`
 
 ```bash
 python3 plot_trans_error.py
 python3 plot_rot_error.py
 ```
 
-| Translation error | Rotation error |
-|:-:|:-:|
-| ![Translation error](figs/trans_error_v2.png) | ![Rotation error](figs/rot_error_v2.png) |
-
 ---
 
-### 4. Box plot — two-group comparison
+### `plot_success_rate.py` — Bar plot
 
-**Script:** `plot_vggt_slam_lc.py`
+Demonstrates that statannotations works identically with `sns.barplot` — just swap `boxplot` for `barplot`.
 
-Compares ATE [m] with and without loop closure (LC) across different window sizes. A clean two-group example.
-
-```bash
-python3 plot_vggt_slam_lc.py
-```
-
-![VGGT SLAM with/without loop closure](figs/vggt_w_and_wo_lc.png)
-
----
-
-### 5. Bar plot — success rate
-
-**Script:** `plot_success_rate.py`
-
-Uses `sns.barplot` instead of `sns.boxplot`. The statannotations API is identical — just swap the plot type.
+**DataFrame:** `{'Dataset': str, 'Alg. name': str, 'time': float [%]}`
 
 ```bash
 python3 plot_success_rate.py
 ```
 
-![Success rate](figs/success_rate.png)
-
 ---
 
-### 6. Heatmap — radii sensitivity analysis
+### `plot_vggt_slam_lc.py` — Two-group comparison
 
-**Script:** `plot_radii_heatmap.py`
+ATE [m] with vs. without loop closure across different window sizes. A minimal two-group example.
 
-Uses `sns.heatmap` to visualize success rate and computation time across a grid of normal radius vs. FPFH radius hyperparameters. No statannotations here — included as a seaborn heatmap reference alongside the other examples.
+**DataFrame:** `{'Window size': str, 'alg_name': str, 'time': float [m]}`
 
 ```bash
-python3 plot_radii_heatmap.py
+python3 plot_vggt_slam_lc.py
 ```
-
-![Radii analysis heatmap](figs/heatmap_0_3_succ.png)
 
 ---
 
@@ -158,55 +166,23 @@ python3 plot_radii_heatmap.py
 
 ```
 .
-├── example_basic_boxplot.py      # Minimal statannotations example (seaborn tips dataset)
+├── example_basic_boxplot.py      # Minimal statannotations example (no hue)
 ├── plot_speed.py                 # Box plot: speed comparison, multi-hue
-├── plot_bufferx_poseest_time.py  # Box plot: log scale + multi-dataset
+├── plot_bufferx_poseest_time.py  # Box plot: log scale + LaTeX labels
 ├── plot_trans_error.py           # Box plot: translation error
-├── plot_rot_error.py             # Box plot: rotation error w/ sensor config
+├── plot_rot_error.py             # Box plot: rotation error
 ├── plot_success_rate.py          # Bar plot: success rate
 ├── plot_vggt_slam_lc.py          # Box plot: w/ vs. w/o loop closure
-├── plot_radii_heatmap.py         # Heatmap: hyperparameter sensitivity
 ├── variables.py                  # Shared plot styling constants
-├── data/                         # Input data (raw txt files, pkl caches)
-├── figs/                         # Representative output figures (for this README)
-└── output/                       # Generated plots (gitignored)
+├── data/                         # Input data
+└── output/
+    ├── for_README/               # Representative figures (tracked by git)
+    └── ...                       # Other generated plots (gitignored)
 ```
 
 ---
 
-## Key Pattern
-
-Every script follows the same three-step pattern:
-
-```python
-# 1. Draw the seaborn plot
-ax = sns.boxplot(data=df, x=x, y=y, hue=hue, ...)
-
-# 2. Create the annotator with the same arguments
-annot = Annotator(ax, pairs, data=df, x=x, y=y, hue=hue, ...)
-
-# 3. Run the test and annotate
-annot.configure(test='Mann-Whitney', verbose=2)
-annot.apply_test()
-annot.annotate()
-```
-
-`pairs` is a list of group tuples to compare. With `hue`, each element is a `(x_val, hue_val)` tuple:
-
-```python
-# Without hue
-pairs = [("Thur", "Fri"), ("Thur", "Sat")]
-
-# With hue
-pairs = [
-    (("Single-thread", "FPFH w/o GS"), ("Single-thread", "Faster-PFH w/o GS")),
-    (("Multi-thread",  "FPFH w/ GS"),  ("Multi-thread",  "Faster-PFH w/ GS")),
-]
-```
-
----
-
-## Reference
+## Citation
 
 If you find these examples useful, please consider citing:
 

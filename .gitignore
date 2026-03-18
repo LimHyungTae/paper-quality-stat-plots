@@ -1,5 +1,6 @@
 *.pkl
-output/
+output/*
+!output/for_README/
 __pycache__/
 .DS_Store
 /bazel-*
