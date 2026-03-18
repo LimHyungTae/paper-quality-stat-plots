@@ -1,5 +1,6 @@
 <div align="center">
-    <h1><code>statannotations</code> Examples — Real-world Paper Figures</h1>
+    <h1><code>statannotations</code> Examples</h1>
+    <h3>Statistical Annotations for Figures in Published Papers</h3>
     <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.8+-blue?logo=python&logoColor=white" /></a>
     <a href="https://github.com/trevismd/statannotations"><img src="https://img.shields.io/badge/statannotations-tutorial-brightgreen" /></a>
     <a href="https://arxiv.org/pdf/2409.15615"><img src="https://img.shields.io/badge/Published-ICRA_2025-red" /></a>
